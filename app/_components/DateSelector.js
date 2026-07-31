@@ -1,31 +1,40 @@
-import { isWithinInterval } from "date-fns";
+"use client";
+
+import {
+  differenceInDays,
+  isPast,
+  isSameDay,
+  isWithinInterval,
+} from "date-fns";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
+import { useReservation } from "./ReservationContext";
 
 function isAlreadyBooked(range, datesArr) {
   return (
     range.from &&
     range.to &&
     datesArr.some((date) =>
-      isWithinInterval(date, { start: range.from, end: range.to })
+      isWithinInterval(date, { start: range.from, end: range.to }),
     )
   );
 }
 
-function DateSelector() {
+function DateSelector({ settings, cabin, bookedDates }) {
+  const { range, setRange, resetRange } = useReservation();
   // CHANGE
-  const regularPrice = 23;
-  const discount = 23;
-  const numNights = 23;
-  const cabinPrice = 23;
-  const range = { from: null, to: null };
 
+  const { regularPrice, discount } = cabin;
+
+  const displayRange = isAlreadyBooked(range, bookedDates) ? {} : range;
+
+  const numNights = differenceInDays(displayRange.to, displayRange.from);
+  const cabinPrice = numNights * (regularPrice - discount);
   // SETTINGS
-  const minBookingLength = 1;
-  const maxBookingLength = 23;
+  const { minBookingLength, maxBookingLength } = settings;
 
   return (
-    <div className="flex flex-col justify-between">
+    <div className="flex flex-col justify-between pl-0.5">
       <DayPicker
         className="pt-12 place-self-center"
         mode="range"
@@ -36,10 +45,23 @@ function DateSelector() {
         toYear={new Date().getFullYear() + 5}
         captionLayout="dropdown"
         numberOfMonths={2}
+        selected={displayRange}
+        disabled={(curDate) =>
+          isPast(curDate) ||
+          bookedDates.some((date) => isSameDay(date, curDate))
+        }
+        onSelect={(range) => setRange(range)}
+        classNames={{
+          range_start: "bg-accent-800",
+          range_middle: "bg-accent-800",
+          range_end: "bg-accent-800",
+
+          selected: "bg-accent-800",
+        }}
       />
 
       <div className="flex items-center justify-between px-8 bg-accent-500 text-primary-800 h-[72px]">
-        <div className="flex items-baseline gap-6">
+        <div className="flex items-baseline gap-6 ">
           <p className="flex gap-2 items-baseline">
             {discount > 0 ? (
               <>

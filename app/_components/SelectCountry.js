@@ -20,7 +20,7 @@ async function SelectCountry({ defaultCountry, name, id, className }) {
       {countries.map((c) => (
         <option
           key={c.names.common}
-          value={`${c.names.common}%${c.flag.emoji}`}
+          value={`${c.names.common}%${c.flag.url_svg}`}
         >
           {c.names.common}
         </option>
